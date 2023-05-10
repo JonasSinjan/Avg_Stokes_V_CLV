@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from true_flux_analysers.profile_analyzer import ProfileAnalyzer
-from true_flux_analysers.multiple_snapshot_wrapper import MultipleSnapshotWrapper
+from multiple_snapshot_wrapper import MultipleSnapshotWrapper
 
 class TrueFluxPlotter:
 
@@ -10,7 +9,7 @@ class TrueFluxPlotter:
 
 
     def get_x_plot(self) -> None:
-        self.x_plot = self.results.mu_values
+        self.x_plot = self.results.analyzers[0].mu_values
     
     
     def multiple_results_exist(self) -> bool:
@@ -26,10 +25,10 @@ class TrueFluxPlotter:
     
 
     def get_temp_comb_curves(self) -> None:
-        self.temp_samp = self.results.analyzer[self.snap_index].comb_normed_signed_amp
-        self.temp_usamp = self.results.analyzer[self.snap_index].comb_normed_unsigned_amp
-        self.temp_sarea = self.results.analyzer[self.snap_index].comb_normed_signed_area
-        self.temp_usarea = self.results.analyzer[self.snap_index].comb_normed_unsigned_area
+        self.temp_samp = self.results.analyzers[self.snap_index].comb_normed_signed_amp
+        self.temp_usamp = self.results.analyzers[self.snap_index].comb_normed_unsigned_amp
+        self.temp_sarea = self.results.analyzers[self.snap_index].comb_normed_signed_area
+        self.temp_usarea = self.results.analyzers[self.snap_index].comb_normed_unsigned_area
 
 
     def get_snapshot_comb_results(self, snapshot: int) -> None:
@@ -57,19 +56,19 @@ class TrueFluxPlotter:
         plt.legend(loc="upper right")
         plt.xlabel(r"$\mu=cos(\theta)$")
         plt.ylabel("(Area or Amp) (normalised) / $\mu$")
-        plt.title(f"(Snapshot: {snapshot} Stokes V Signal (pos+neg) (normalised) {self.field_strength}G / $\mu$")
+        plt.title(f"(Snapshot: {snapshot} Stokes V Signal (pos+neg) (normalised) {self.results.field_strength}G / $\mu$")
         plt.show()
     
     def get_temp_sep_curves(self) -> None:
-        self.temp_pos_samp = self.results.analyzer[self.snap_index].pos_normed_signed_amp
-        self.temp_pos_usamp = self.results.analyzer[self.snap_index].pos_normed_unsigned_amp
-        self.temp_pos_sarea = self.results.analyzer[self.snap_index].pos_normed_signed_area
-        self.temp_pos_usarea = self.results.analyzer[self.snap_index].pos_normed_unsigned_area
+        self.temp_pos_samp = self.results.analyzers[self.snap_index].pos_normed_signed_amp
+        self.temp_pos_usamp = self.results.analyzers[self.snap_index].pos_normed_unsigned_amp
+        self.temp_pos_sarea = self.results.analyzers[self.snap_index].pos_normed_signed_area
+        self.temp_pos_usarea = self.results.analyzers[self.snap_index].pos_normed_unsigned_area
 
-        self.temp_neg_samp = self.results.analyzer[self.snap_index].neg_normed_signed_amp
-        self.temp_neg_usamp = self.results.analyzer[self.snap_index].neg_normed_unsigned_amp
-        self.temp_neg_sarea = self.results.analyzer[self.snap_index].neg_normed_signed_area
-        self.temp_neg_usarea = self.results.analyzer[self.snap_index].neg_normed_unsigned_area
+        self.temp_neg_samp = self.results.analyzers[self.snap_index].neg_normed_signed_amp
+        self.temp_neg_usamp = self.results.analyzers[self.snap_index].neg_normed_unsigned_amp
+        self.temp_neg_sarea = self.results.analyzers[self.snap_index].neg_normed_signed_area
+        self.temp_neg_usarea = self.results.analyzers[self.snap_index].neg_normed_unsigned_area
 
 
     def get_snapshot_sep_results(self, snapshot: int) -> None:
@@ -98,7 +97,7 @@ class TrueFluxPlotter:
         plt.legend(loc="upper right")
         plt.xlabel(r"$\mu=cos(\theta)$")
         plt.ylabel("(Area or Amp) (normalised) / $\mu$")
-        plt.title(f"(Snapshot: {snapshot} Stokes V Signal (pos) (normalised) {self.field_strength}G / $\mu$")
+        plt.title(f"(Snapshot: {snapshot} Stokes V Signal (pos) (normalised) {self.results.field_strength}G / $\mu$")
 
         plt.subplot(1,2,2)
         plt.plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, label = "Unsigned Area")
@@ -113,7 +112,7 @@ class TrueFluxPlotter:
         plt.legend(loc="upper right")
         plt.xlabel(r"$\mu=cos(\theta)$")
         plt.ylabel("(Area or Amp) (normalised) / $\mu$")
-        plt.title(f"(Snapshot: {snapshot} Stokes V Signal (neg) (normalised) {self.field_strength}G / $\mu$")
+        plt.title(f"(Snapshot: {snapshot} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
 
         plt.show()
 
@@ -126,34 +125,39 @@ class TrueFluxPlotter:
 
 
     def avg_curves(self) -> None:
-        self.temp_usarea = np.mean([self.results.analyzer[i].comb_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.temp_usamp = np.mean([self.results.analyzer[i].comb_normed_unsigned_amp for i in self.snap_indices], axis = 0)
-        self.temp_sarea = np.mean([self.results.analyzer[i].comb_normed_signed_area for i in self.snap_indices], axis = 0)
-        self.temp_samp = np.mean([self.results.analyzer[i].comb_normed_signed_amp for i in self.snap_indices], axis = 0)
+        self.temp_usarea = np.mean([self.results.analyzers[i].comb_normed_unsigned_area for i in self.snap_indices], axis = 0)
+        self.temp_usamp = np.mean([self.results.analyzers[i].comb_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.temp_sarea = np.mean([self.results.analyzers[i].comb_normed_signed_area for i in self.snap_indices], axis = 0)
+        self.temp_samp = np.mean([self.results.analyzers[i].comb_normed_signed_amp for i in self.snap_indices], axis = 0)
 
 
     def std_curves(self) -> None:
-        self.std_usarea = np.std([self.results.analyzer[i].comb_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.std_usamp = np.std([self.results.analyzer[i].comb_normed_unsigned_amp for i in self.snap_indices], axis = 0)
-        self.std_sarea = np.std([self.results.analyzer[i].comb_normed_signed_area for i in self.snap_indices], axis = 0)
-        self.std_samp = np.std([self.results.analyzer[i].comb_normed_signed_amp for i in self.snap_indices], axis = 0)
+        self.std_usarea = np.std([self.results.analyzers[i].comb_normed_unsigned_area for i in self.snap_indices], axis = 0)
+        self.std_usamp = np.std([self.results.analyzers[i].comb_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.std_sarea = np.std([self.results.analyzers[i].comb_normed_signed_area for i in self.snap_indices], axis = 0)
+        self.std_samp = np.std([self.results.analyzers[i].comb_normed_signed_amp for i in self.snap_indices], axis = 0)
         
+
+    def all_snapshots_exist(self, snapshots: list) -> bool:
+        return all(x in self.results.snapshots for x in snapshots)
+    
 
     def get_avg_std_of_curves(self, snapshots: list) -> None:
         if self.all_snapshots_exist(snapshots):
             self.get_snap_indices(snapshots)
             self.avg_curves()
-            self.std_curves
+            self.std_curves()
         else:
             print("Snapshots do not exist in", self.results.snapshots)
 
 
-    def plot_comb_multiple_snapshots(self, snapshots: list = None) -> None:
+    def plot_comb_multiple_snapshots(self, snapshots: list = None, ) -> plt.figure:
+        if snapshots == None:
+            snapshots = self.results.snapshots
         self.get_avg_std_of_curves(snapshots)
         self.get_x_plot()
 
         plt.figure(figsize = (8,6))
-        plt.subplot(1,2,1)
         plt.plot(self.x_plot, self.temp_usarea, marker = "o", markersize = 3, label = "Unsigned Area")
         plt.plot(self.x_plot, self.temp_usamp, marker = "o", markersize = 3, label = "Unsigned Amp")
         plt.plot(self.x_plot, self.temp_sarea, marker = "o", markersize = 3, label = "Signed Area")
@@ -171,16 +175,5 @@ class TrueFluxPlotter:
         plt.legend(loc="upper right")
         plt.xlabel(r"$\mu=cos(\theta)$")
         plt.ylabel("(Area or Amp) (normalised) / $\mu$")
-        plt.title(f"(Num Snapshot(s): {len(snapshots)} Stokes V Signal (pos+neg) (normalised) {self.field_strength}G / $\mu$")
-
+        plt.title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (pos+neg) (normalised) {self.results.field_strength}G / $\mu$")
         plt.show()
-
-
-
-        """
-        if self.multiple_results_exist():
-            self.get_std_curves()
-            plt.fill_between(self.x_plot, self.avg_usarea-self.std_usarea, self.avg_usarea+self.std_usarea, color = 'blue', alpha = 0.2)
-            plt.fill_between(self.x_plot, self.avg_usamp-self.std_usamp, self.avg_usamp+self.std_usamp, color = 'orange', alpha = 0.2)
-            plt.fill_between(self.x_plot, self.avg_sarea-self.std_sarea, self.avg_sarea+self.std_sarea, color = 'green', alpha = 0.2)
-            plt.fill_between(self.x_plot, self.avg_samp-self.std_samp, self.avg_samp+self.std_samp, color = 'red', alpha = 0.2)"""

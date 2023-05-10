@@ -1,19 +1,22 @@
 import numpy as np
-from true_flux_analysers.profile_analyzer import ProfileAnalyzer
+from profile_analyzer import ProfileAnalyzer
 
 class MultipleSnapshotWrapper:
 
-    def __init__(self, field_strength, snapshots) -> None:
+    def __init__(self, field_strength, snapshots: list = None, negang_str: str = '-') -> None:
         assert type(snapshots) == list
-        assert len(snapshots) > 1
+        assert len(snapshots) > 0
         self.snapshots = snapshots
         self.field_strength = field_strength
+        self.negang_str = negang_str
 
 
-    def run_multiple_snapshot_analyzers(self):
+    def run_multiple_analyzers(self):
         self.analyzers = []
         for snap in self.snapshots:
-            self.analyzers.append(ProfileAnalyzer(self.field_strength, snap).run_analysis())
+            temp = ProfileAnalyzer(self.field_strength, snap, self.negang_str)
+            temp.run_analysis()
+            self.analyzers.append(temp)
 
 
     def return_analyzers(self):
