@@ -82,23 +82,35 @@ class ProfileAnalyzer():
 
     def return_neg_stokes_v_proxy_strengths_as_list(self):
         return [self.neg_signed_amp, self.neg_unsigned_amp, self.neg_signed_area, self.neg_unsigned_area]
-    
-
-    def combine_pos_neg_proxy_strengths(self):
-        self.comb_params = [np.add(x,y) for x,y in zip(self.return_pos_stokes_v_proxy_strengths_as_list(), self.return_neg_stokes_v_proxy_strengths_as_list())]
 
 
     def norm_curves_by_mu_and_mu_is_1_value(self):
-        self.combine_pos_neg_proxy_strengths()
-        self.normed_signed_amp = np.flip(self.comb_params[0])/2/self.pos_signed_amp[0]/self.mu_values
-        self.normed_unsigned_amp = np.flip(self.comb_params[1])/2/self.pos_unsigned_amp[0]/self.mu_values
-        self.normed_signed_area = np.flip(self.comb_params[2])/2/self.pos_signed_area[0]/self.mu_values
-        self.normed_unsigned_area = np.flip(self.comb_params[3])/2/self.pos_unsigned_area[0]/self.mu_values
+        self.pos_normed_signed_amp = np.flip(self.pos_signed_amp)/self.pos_signed_amp[0]/self.mu_values
+        self.pos_normed_unsigned_amp = np.flip(self.pos_unsigned_amp)/self.pos_unsigned_amp[0]/self.mu_values
+        self.pos_normed_signed_area = np.flip(self.pos_signed_area)/self.pos_signed_area[0]/self.mu_values
+        self.pos_normed_unsigned_area = np.flip(self.pos_unsigned_area)/self.pos_unsigned_area[0]/self.mu_values
+
+        self.neg_normed_signed_amp = np.flip(self.neg_signed_amp)/self.pos_signed_amp[0]/self.mu_values
+        self.neg_normed_unsigned_amp = np.flip(self.neg_unsigned_amp)/self.pos_unsigned_amp[0]/self.mu_values
+        self.neg_normed_signed_area = np.flip(self.neg_signed_area)/self.pos_signed_area[0]/self.mu_values
+        self.neg_normed_unsigned_area = np.flip(self.neg_unsigned_area)/self.pos_unsigned_area[0]/self.mu_values
+
+
+    def return_pos_neg_normed_curves_as_lists(self):
+        return [self.pos_normed_signed_amp, self.pos_normed_unsigned_amp, self.pos_normed_signed_area, self.pos_normed_unsigned_area], [self.neg_normed_signed_amp, self.neg_normed_unsigned_amp, self.neg_normed_signed_area, self.neg_normed_unsigned_area]
+    
+
+    def combine_pos_neg_normed_curves(self):
+        self.comb_normed_curves = [np.add(x,y)/2 for x,y in zip(self.return_pos_neg_normed_curves_as_lists()[0], self.return_pos_neg_normed_curves_as_lists()[1])]
+        self.comb_normed_signed_amp = self.comb_normed_curves[0]
+        self.comb_normed_unsigned_amp = self.comb_normed_curves[1]
+        self.comb_normed_signed_area = self.comb_normed_curves[2]
+        self.comb_normed_unsigned_area = self.comb_normed_curves[3]
     
 
     def run_analysis(self):
         self.get_mean_signed_and_unsigned_stokes_vs()
         self.get_pos_stokes_v_proxy_strengths()
         self.get_neg_stokes_v_proxy_strengths()
-        self.combine_pos_neg_proxy_strengths()
         self.norm_curves_by_mu_and_mu_is_1_value()
+        self.combine_pos_neg_normed_curves()
