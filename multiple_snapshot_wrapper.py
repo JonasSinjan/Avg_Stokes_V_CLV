@@ -21,3 +21,7 @@ class MultipleSnapshotWrapper:
 
     def return_analyzers(self):
         return self.analyzers
+    
+
+    def num_snapshots(self):
+        print(len(self.snapshots))
