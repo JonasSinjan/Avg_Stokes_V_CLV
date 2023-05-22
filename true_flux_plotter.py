@@ -40,7 +40,7 @@ class TrueFluxPlotter:
 
 
     def plot_comb_single_snapshot(self, snapshot: int) -> None:
-        self.get_snapshot_comb_results(self,snapshot)
+        self.get_snapshot_comb_results(snapshot)
         self.get_x_plot()
 
         _, ax = plt.subplots(figsize = (8,6))
@@ -53,7 +53,7 @@ class TrueFluxPlotter:
         ax.tick_params(bottom=True,top=True,left=True,right=True)
         ax.tick_params(labelbottom=True, labelleft= True, labelright = True, labeltop = True)
         ax.axhline(y = 0, color = "black")
-        ax.set_legend(loc="upper right")
+        ax.legend(loc="upper right")
         ax.set_xlabel(r"$\mu=cos(\theta)$")
         ax.set_ylabel("(Area or Amp) (normalised) / $\mu$")
         ax.set_title(f"(Snapshot: {snapshot} Stokes V Signal (pos+neg) (normalised) {self.results.field_strength}G / $\mu$")
@@ -80,7 +80,7 @@ class TrueFluxPlotter:
 
 
     def plot_pos_neg_single_snapshot(self, snapshot: int) -> None:
-        self.get_snapshot_sep_results(self,snapshot)
+        self.get_snapshot_sep_results(snapshot)
         self.get_x_plot()
 
         _, axarr = plt.subplots(1,2,figsize = (16,6))
@@ -96,7 +96,7 @@ class TrueFluxPlotter:
         axarr[0].legend(loc="upper right")
         axarr[0].set_xlabel(r"$\mu=cos(\theta)$")
         axarr[0].set_ylabel("(Area or Amp) (normalised) / $\mu$")
-        axarr[0].set_title(f"(Snapshot: {snapshot} Stokes V Signal (pos) (normalised) {self.results.field_strength}G / $\mu$")
+        axarr[0].set_title(f"Snapshot: {snapshot} Stokes V Signal (pos) (normalised) {self.results.field_strength}G / $\mu$")
 
         axarr[1].plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, label = "Unsigned Area")
         axarr[1].plot(self.x_plot, self.temp_neg_usamp, marker = "o", markersize = 3, label = "Unsigned Amp")
@@ -110,7 +110,7 @@ class TrueFluxPlotter:
         axarr[1].legend(loc="upper right")
         axarr[1].set_xlabel(r"$\mu=cos(\theta)$")
         axarr[1].set_ylabel("(Area or Amp) (normalised) / $\mu$")
-        axarr[1].set_title(f"(Snapshot: {snapshot} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
+        axarr[1].set_title(f"Snapshot: {snapshot} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
         return axarr
 
 
@@ -139,16 +139,16 @@ class TrueFluxPlotter:
         return all(x in self.results.snapshots for x in snapshots)
     
 
-    def get_avg_std_of_curves(self, snapshots: list) -> None:
+    def get_avg_std_of_curves(self, snapshots: list, sep = 'False') -> None:
         if self.all_snapshots_exist(snapshots):
             self.get_snap_indices(snapshots)
-            self.avg_curves()
-            self.std_curves()
+            self.avg_curves(sep)
+            self.std_curves(sep)
         else:
             print("Snapshots do not exist in", self.results.snapshots)
 
 
-    def plot_comb_multiple_snapshots(self, snapshots: list = None, ) -> plt.axes:
+    def plot_comb_multiple_snapshots(self, snapshots: list = None) -> plt.axes:
         if snapshots == None:
             snapshots = self.results.snapshots
         self.get_avg_std_of_curves(snapshots)
@@ -169,8 +169,88 @@ class TrueFluxPlotter:
         ax.tick_params(bottom=True,top=True,left=True,right=True)
         ax.tick_params(labelbottom=True, labelleft= True, labelright = True, labeltop = True)
         ax.axhline(y = 0, color = "black")
-        ax.set_legend(loc="upper right")
+        ax.legend(loc="upper right")
         ax.set_xlabel(r"$\mu=cos(\theta)$")
         ax.set_ylabel("(Area or Amp) (normalised) / $\mu$")
         ax.set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (pos+neg) (normalised) {self.results.field_strength}G / $\mu$")
         return ax
+    
+
+    def avg_sep_curves(self) -> None:
+        self.temp_pos_usarea = np.mean([self.results.analyzers[i].pos_normed_unsigned_area for i in self.snap_indices], axis = 0)
+        self.temp_pos_usamp = np.mean([self.results.analyzers[i].pos_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.temp_pos_sarea = np.mean([self.results.analyzers[i].pos_normed_signed_area for i in self.snap_indices], axis = 0)
+        self.temp_pos_samp = np.mean([self.results.analyzers[i].pos_normed_signed_amp for i in self.snap_indices], axis = 0)
+
+        self.temp_neg_usarea = np.mean([self.results.analyzers[i].neg_normed_unsigned_area for i in self.snap_indices], axis = 0)
+        self.temp_neg_usamp = np.mean([self.results.analyzers[i].neg_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.temp_neg_sarea = np.mean([self.results.analyzers[i].neg_normed_signed_area for i in self.snap_indices], axis = 0)
+        self.temp_neg_samp = np.mean([self.results.analyzers[i].neg_normed_signed_amp for i in self.snap_indices], axis = 0)
+
+
+    def std_sep_curves(self) -> None:
+        self.std_pos_usarea = np.std([self.results.analyzers[i].pos_normed_unsigned_area for i in self.snap_indices], axis = 0)
+        self.std_pos_usamp = np.std([self.results.analyzers[i].pos_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.std_pos_sarea = np.std([self.results.analyzers[i].pos_normed_signed_area for i in self.snap_indices], axis = 0)
+        self.std_pos_samp = np.std([self.results.analyzers[i].pos_normed_signed_amp for i in self.snap_indices], axis = 0)
+
+        self.std_neg_usarea = np.std([self.results.analyzers[i].neg_normed_unsigned_area for i in self.snap_indices], axis = 0)
+        self.std_neg_usamp = np.std([self.results.analyzers[i].neg_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.std_neg_sarea = np.std([self.results.analyzers[i].neg_normed_signed_area for i in self.snap_indices], axis = 0)
+        self.std_neg_samp = np.std([self.results.analyzers[i].neg_normed_signed_amp for i in self.snap_indices], axis = 0)
+
+
+    def get_avg_std_of_sep_curves(self, snapshots: list = None) -> None:
+        if self.all_snapshots_exist(snapshots):
+            self.get_snap_indices(snapshots)
+            self.avg_sep_curves()
+            self.std_sep_curves()
+        else:
+            print("Snapshots do not exist in", self.results.snapshots)
+
+    
+    def plot_pos_neg_multiple_snapshots(self, snapshots: list = None) -> None:
+        if snapshots == None:
+            snapshots = self.results.snapshots
+        self.get_avg_std_of_sep_curves(snapshots)
+        self.get_x_plot()
+
+        _, axarr = plt.subplots(1,2,figsize = (16,6))
+        axarr[0].plot(self.x_plot, self.temp_pos_usarea, marker = "o", markersize = 3, label = "Unsigned Area")
+        axarr[0].plot(self.x_plot, self.temp_pos_usamp, marker = "o", markersize = 3, label = "Unsigned Amp")
+        axarr[0].plot(self.x_plot, self.temp_pos_sarea, marker = "o", markersize = 3, label = "Signed Area")
+        axarr[0].plot(self.x_plot, self.temp_pos_samp, marker = "o", markersize = 3, label = "Signed Amp")        
+
+        axarr[0].fill_between(self.x_plot, self.temp_pos_usarea-self.std_pos_usarea, self.temp_pos_usarea+self.std_pos_usarea, color = 'blue', alpha = 0.2)
+        axarr[0].fill_between(self.x_plot, self.temp_pos_usamp-self.std_pos_usamp, self.temp_pos_usamp+self.std_pos_usamp, color = 'orange', alpha = 0.2)
+        axarr[0].fill_between(self.x_plot, self.temp_pos_sarea-self.std_pos_sarea, self.temp_pos_sarea+self.std_pos_sarea, color = 'green', alpha = 0.2)
+        axarr[0].fill_between(self.x_plot, self.temp_pos_samp-self.std_pos_samp, self.temp_pos_samp+self.std_pos_samp, color = 'red', alpha = 0.2)   
+
+        axarr[0].plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
+        axarr[0].tick_params(bottom=True,top=True,left=True,right=True)
+        axarr[0].tick_params(labelbottom=True, labelleft= True, labelright = True, labeltop = True)
+        axarr[0].axhline(y = 0, color = "black")
+        axarr[0].legend(loc="upper right")
+        axarr[0].set_xlabel(r"$\mu=cos(\theta)$")
+        axarr[0].set_ylabel("(Area or Amp) (normalised) / $\mu$")
+        axarr[0].set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (pos) (normalised) {self.results.field_strength}G / $\mu$")
+
+        axarr[1].plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, label = "Unsigned Area")
+        axarr[1].plot(self.x_plot, self.temp_neg_usamp, marker = "o", markersize = 3, label = "Unsigned Amp")
+        axarr[1].plot(self.x_plot, self.temp_neg_sarea, marker = "o", markersize = 3, label = "Signed Area")
+        axarr[1].plot(self.x_plot, self.temp_neg_samp, marker = "o", markersize = 3, label = "Signed Amp")     
+
+        axarr[1].fill_between(self.x_plot, self.temp_neg_usarea-self.std_neg_usarea, self.temp_neg_usarea+self.std_neg_usarea, color = 'blue', alpha = 0.2)
+        axarr[1].fill_between(self.x_plot, self.temp_neg_usamp-self.std_neg_usamp, self.temp_neg_usamp+self.std_neg_usamp, color = 'orange', alpha = 0.2)
+        axarr[1].fill_between(self.x_plot, self.temp_neg_sarea-self.std_neg_sarea, self.temp_neg_sarea+self.std_neg_sarea, color = 'green', alpha = 0.2)
+        axarr[1].fill_between(self.x_plot, self.temp_neg_samp-self.std_neg_samp, self.temp_neg_samp+self.std_neg_samp, color = 'red', alpha = 0.2)      
+
+        axarr[1].plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
+        axarr[1].tick_params(bottom=True,top=True,left=True,right=True)
+        axarr[1].tick_params(labelbottom=True, labelleft= True, labelright = True, labeltop = True)
+        axarr[1].axhline(y = 0, color = "black")
+        axarr[1].legend(loc="upper right")
+        axarr[1].set_xlabel(r"$\mu=cos(\theta)$")
+        axarr[1].set_ylabel("(Area or Amp) (normalised) / $\mu$")
+        axarr[1].set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
+        return axarr
