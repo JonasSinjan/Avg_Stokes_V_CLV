@@ -1,1 +1,12 @@
 __pycache__/profile_analyzer.cpython-37.pyc
+__pycache__/__init__.cpython-37.pyc
+.gitignore
+.gitignore
+__pycache__/true_flux_plotter.cpython-37.pyc
+src/__pycache__/multiple_snapshot_wrapper.cpython-37.pyc
+src/__pycache__/profile_analyzer.cpython-37.pyc
+tests/__pycache__/__init__.cpython-37.pyc
+tests/__pycache__/test_multiple_snapshot_wrapper.cpython-37-pytest-7.1.1.pyc
+tests/__pycache__/test_profile_analyzer.cpython-37-pytest-7.1.1.pyc
+src/__pycache__/__init__.cpython-37.pyc
+__pycache__/multiple_snapshot_wrapper.cpython-37.pyc

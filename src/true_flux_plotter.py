@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from multiple_snapshot_wrapper import MultipleSnapshotWrapper
+from .multiple_snapshot_wrapper import MultipleSnapshotWrapper
 
 class TrueFluxPlotter:
 

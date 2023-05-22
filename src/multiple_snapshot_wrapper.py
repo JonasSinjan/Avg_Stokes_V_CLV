@@ -1,5 +1,5 @@
 import numpy as np
-from profile_analyzer import ProfileAnalyzer
+from .profile_analyzer import ProfileAnalyzer
 
 class MultipleSnapshotWrapper:
 
@@ -9,10 +9,10 @@ class MultipleSnapshotWrapper:
         self.snapshots = snapshots
         self.field_strength = field_strength
         self.negang_str = negang_str
+        self.analyzers = []
 
 
     def run_multiple_analyzers(self):
-        self.analyzers = []
         for snap in self.snapshots:
             temp = ProfileAnalyzer(self.field_strength, snap, self.negang_str)
             temp.run_analysis()
@@ -25,3 +25,4 @@ class MultipleSnapshotWrapper:
 
     def num_snapshots(self):
         print(len(self.snapshots))
+        return len(self.snapshots)
