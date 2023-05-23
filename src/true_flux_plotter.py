@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from .multiple_snapshot_wrapper import MultipleSnapshotWrapper
+from multiple_snapshot_wrapper import MultipleSnapshotWrapper
 
 class TrueFluxPlotter:
 
@@ -139,11 +139,11 @@ class TrueFluxPlotter:
         return all(x in self.results.snapshots for x in snapshots)
     
 
-    def get_avg_std_of_curves(self, snapshots: list, sep = 'False') -> None:
+    def get_avg_std_of_curves(self, snapshots: list) -> None:
         if self.all_snapshots_exist(snapshots):
             self.get_snap_indices(snapshots)
-            self.avg_curves(sep)
-            self.std_curves(sep)
+            self.avg_curves()
+            self.std_curves()
         else:
             print("Snapshots do not exist in", self.results.snapshots)
 

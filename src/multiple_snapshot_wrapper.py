@@ -1,5 +1,5 @@
 import numpy as np
-from .profile_analyzer import ProfileAnalyzer
+from profile_analyzer import ProfileAnalyzer
 
 class MultipleSnapshotWrapper:
 
