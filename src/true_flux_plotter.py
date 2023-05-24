@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 from multiple_snapshot_wrapper import MultipleSnapshotWrapper
 
@@ -79,7 +80,7 @@ class TrueFluxPlotter:
             print("Snapshot does not exist in", self.results.snapshots)
 
 
-    def plot_pos_neg_single_snapshot(self, snapshot: int) -> None:
+    def plot_pos_neg_single_snapshot(self, snapshot: int) -> np.array:
         self.get_snapshot_sep_results(snapshot)
         self.get_x_plot()
 
@@ -148,7 +149,7 @@ class TrueFluxPlotter:
             print("Snapshots do not exist in", self.results.snapshots)
 
 
-    def plot_comb_multiple_snapshots(self, snapshots: list = None) -> plt.axes:
+    def plot_comb_multiple_snapshots(self, snapshots: list = None) -> mpl.axes:
         if snapshots == None:
             snapshots = self.results.snapshots
         self.get_avg_std_of_curves(snapshots)
@@ -209,7 +210,7 @@ class TrueFluxPlotter:
             print("Snapshots do not exist in", self.results.snapshots)
 
     
-    def plot_pos_neg_multiple_snapshots(self, snapshots: list = None) -> None:
+    def plot_pos_neg_multiple_snapshots(self, snapshots: list = None) -> np.array:
         if snapshots == None:
             snapshots = self.results.snapshots
         self.get_avg_std_of_sep_curves(snapshots)
@@ -255,42 +256,101 @@ class TrueFluxPlotter:
         axarr[1].set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
         return axarr
     
-"""
-def plot_V(analyzer, mu_indices, xmax = 1750, xmin = -1750, ymin = -0.01, ymax = 0.01):
-    plt.figure(figsize = (8,6))
-    wavelengths = np.linspace(-1750,1750,251)
-    for i in mu_indices:
-        plt.plot(wavelengths, analyzer.pos_signed_mean_v[12-i]/analyzer.Ic, label = f"$\mu = ${analyzer.mu_values[i]:.2g}", marker = "o", markersize = 2)
-    plt.legend()
-    plt.xlabel(r"Wavelength (m$\AA$)")
-    plt.ylabel("Signed Mean Stokes V/Ic")
-    plt.xlim(xmin, xmax)
-    plt.ylim(ymin, ymax)
-    plt.title(f"{analyzer.field_strength} G - snapshot: {analyzer.snapshot}")
-    plt.show()
-"""
 
-"""
-def plot_mulitple_snapshots_V(MultipleWrapperAnalyzer, snapshots, mu_indices, xmax = 1750, xmin = -1750, ymin = -0.01, ymax = 0.01):
-    plt.figure(figsize = (8,6))
-    wavelengths = np.linspace(-1750,1750,251)
+    def plot_stokes_v(self, snapshot: int, mu_indices: list, pos_or_neg: str = 'pos', xmax: int = 1750, xmin: int = -1750, ymin: float = -0.01, ymax: float = 0.01) -> None:
+        """
+        plot Stokes V signal for a given snapshot and mu values, and for a given viewing direction (pos or neg or both)
 
-    stacked_over_mu = []
-    for snapshot in snapshots:
-        snap_index = MultipleWrapperAnalyzer.snapshots.index(snapshot)
-        stacked_over_mu.append(np.stack(MultipleWrapperAnalyzer.analyzers[snap_index].pos_signed_mean_v/MultipleWrapperAnalyzer.analyzers[snap_index].Ic))
-        
-    pos_v_over_mu_and_snap = np.stack(stacked_over_mu)
-    pos_v_avgd_over_snap = np.mean(pos_v_over_mu_and_snap, axis = 0)
-    pos_v_std_over_snap = np.std(pos_v_over_mu_and_snap, axis = 0)
-    for i in mu_indices:
-        plt.plot(wavelengths, pos_v_avgd_over_snap[12-i,:], label = f"$\mu = ${MultipleWrapperAnalyzer.analyzers[0].mu_values[i]:.2g}", marker = "o", markersize = 2)
-        plt.fill_between(wavelengths,  pos_v_avgd_over_snap[12-i,:]-pos_v_std_over_snap[12-i,:], pos_v_avgd_over_snap[12-i,:]+pos_v_std_over_snap[12-i,:], alpha = 0.2)
-    plt.legend()
-    plt.xlabel(r"Wavelength (m$\AA$)")
-    plt.ylabel("Signed Mean Stokes V/Ic")
-    plt.xlim(xmin, xmax)
-    plt.ylim(ymin, ymax)
-    plt.title(f"{MultipleWrapperAnalyzer.analyzers[0].field_strength} G - Num snapshots: {len(snapshots)}")
-    plt.show()
-"""
+        Parameters
+        ----------
+        snapshot : int
+            snapshot number
+        mu_indices : list
+            list of indices of the mu value(s) to plot - to see possible mu values: execute `self.get_x_plot()`, then `print(self.mu_values)`
+        pos_or_neg : str
+            'pos' for positive viewing direction, 'neg' for negative viewing direction, 'both' for both
+        xmax : int
+            maximum wavelength to plot
+        xmin : int
+            minimum wavelength to plot
+        ymin : float
+            minimum Stokes V value to plot
+        ymax : float
+            maximum Stokes V value to plot
+
+        Returns
+        -------
+        None
+        """
+        self.get_snap_index(snapshot)
+        analyzer = self.results.analyzers[self.snap_index]
+        wavelengths = np.linspace(-1750,1750,251)
+        if pos_or_neg == 'pos':
+            mean_v =  analyzer.pos_signed_mean_v[12-i]
+        elif pos_or_neg == 'neg':
+            mean_v =  analyzer.neg_signed_mean_v[12-i]
+        elif pos_or_neg == 'both':
+            mean_v = (analyzer.pos_signed_mean_v[12-i] + analyzer.neg_signed_mean_v[12-i])/2
+        plt.figure(figsize = (8,6))
+        for i in mu_indices:
+            plt.plot(wavelengths, mean_v/analyzer.Ic, label = f"$\mu = ${analyzer.mu_values[i]:.2g}", marker = "o", markersize = 2)
+        plt.legend()
+        plt.xlabel(r"Wavelength (m$\AA$)")
+        plt.ylabel("Signed Mean Stokes V/Ic")
+        plt.xlim(xmin, xmax)
+        plt.ylim(ymin, ymax)
+        plt.title(f"{analyzer.field_strength} G - snapshot: {analyzer.snapshot} - viewing direction: {pos_or_neg}")
+        plt.show()
+
+
+    def plot_avg_multiple_snapshots_stokes_v(self, snapshots: list, mu_indices: list, pos_or_neg: str = 'pos', xmax: int = 1750, xmin: int = -1750, ymin: float = -0.01, ymax: float = 0.01) -> None:
+        """
+        plot Stokes V signal for desired snapshot(s) and mu values, and for a given viewing direction (pos or neg or both)
+
+        Parameters
+        ----------
+        snapshot : array_like
+            snapshot number(s)
+        mu_indices : list
+            list of indices of the mu value(s) to plot - to see possible mu values: execute `self.get_x_plot()`, then `print(self.mu_values)`
+        pos_or_neg : str
+            'pos' for positive viewing direction, 'neg' for negative viewing direction, 'both' for both
+        xmax : int
+            maximum wavelength to plot
+        xmin : int
+            minimum wavelength to plot
+        ymin : float
+            minimum Stokes V value to plot
+        ymax : float
+            maximum Stokes V value to plot
+
+        Returns
+        -------
+        None
+        """
+        stokes_v_stacked_over_mu = []
+        for snapshot in snapshots:
+            snap_index = self.results.snapshots.index(snapshot)
+            if pos_or_neg == 'pos':
+                stokes_v_stacked_over_mu.append(np.stack(self.results.analyzers[snap_index].pos_signed_mean_v/self.results.analyzers[snap_index].Ic))
+            elif pos_or_neg == 'neg':
+                stokes_v_stacked_over_mu.append(np.stack(self.results.analyzers[snap_index].neg_signed_mean_v/self.results.analyzers[snap_index].Ic))
+            elif pos_or_neg == 'both':
+                stokes_v_stacked_over_mu.append(np.stack((self.results.analyzers[snap_index].pos_signed_mean_v + self.results.analyzers[snap_index].neg_signed_mean_v)/(2*self.results.analyzers[snap_index].Ic)))
+            
+        v_over_mu_and_snap = np.stack(stokes_v_stacked_over_mu)
+        v_avgd_over_snap = np.mean(v_over_mu_and_snap, axis = 0)
+        v_std_over_snap = np.std(v_over_mu_and_snap, axis = 0)
+
+        wavelengths = np.linspace(-1750,1750,251)
+        plt.figure(figsize = (8,6))
+        for i in mu_indices:
+            plt.plot(wavelengths, v_avgd_over_snap[12-i,:], label = f"$\mu = ${self.results.analyzers[0].mu_values[i]:.2g}", marker = "o", markersize = 2)
+            plt.fill_between(wavelengths,  v_avgd_over_snap[12-i,:]-v_std_over_snap[12-i,:], v_avgd_over_snap[12-i,:]+v_std_over_snap[12-i,:], alpha = 0.2)
+        plt.legend()
+        plt.xlabel(r"Wavelength (m$\AA$)")
+        plt.ylabel("Signed Mean Stokes V/Ic")
+        plt.xlim(xmin, xmax)
+        plt.ylim(ymin, ymax)
+        plt.title(f"{self.results.analyzers[0].field_strength} G - Num snapshots: {len(snapshots)} - viewing direction: {pos_or_neg}")
+        plt.show()
