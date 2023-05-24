@@ -254,3 +254,43 @@ class TrueFluxPlotter:
         axarr[1].set_ylabel("(Area or Amp) (normalised) / $\mu$")
         axarr[1].set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
         return axarr
+    
+"""
+def plot_V(analyzer, mu_indices, xmax = 1750, xmin = -1750, ymin = -0.01, ymax = 0.01):
+    plt.figure(figsize = (8,6))
+    wavelengths = np.linspace(-1750,1750,251)
+    for i in mu_indices:
+        plt.plot(wavelengths, analyzer.pos_signed_mean_v[12-i]/analyzer.Ic, label = f"$\mu = ${analyzer.mu_values[i]:.2g}", marker = "o", markersize = 2)
+    plt.legend()
+    plt.xlabel(r"Wavelength (m$\AA$)")
+    plt.ylabel("Signed Mean Stokes V/Ic")
+    plt.xlim(xmin, xmax)
+    plt.ylim(ymin, ymax)
+    plt.title(f"{analyzer.field_strength} G - snapshot: {analyzer.snapshot}")
+    plt.show()
+"""
+
+"""
+def plot_mulitple_snapshots_V(MultipleWrapperAnalyzer, snapshots, mu_indices, xmax = 1750, xmin = -1750, ymin = -0.01, ymax = 0.01):
+    plt.figure(figsize = (8,6))
+    wavelengths = np.linspace(-1750,1750,251)
+
+    stacked_over_mu = []
+    for snapshot in snapshots:
+        snap_index = MultipleWrapperAnalyzer.snapshots.index(snapshot)
+        stacked_over_mu.append(np.stack(MultipleWrapperAnalyzer.analyzers[snap_index].pos_signed_mean_v/MultipleWrapperAnalyzer.analyzers[snap_index].Ic))
+        
+    pos_v_over_mu_and_snap = np.stack(stacked_over_mu)
+    pos_v_avgd_over_snap = np.mean(pos_v_over_mu_and_snap, axis = 0)
+    pos_v_std_over_snap = np.std(pos_v_over_mu_and_snap, axis = 0)
+    for i in mu_indices:
+        plt.plot(wavelengths, pos_v_avgd_over_snap[12-i,:], label = f"$\mu = ${MultipleWrapperAnalyzer.analyzers[0].mu_values[i]:.2g}", marker = "o", markersize = 2)
+        plt.fill_between(wavelengths,  pos_v_avgd_over_snap[12-i,:]-pos_v_std_over_snap[12-i,:], pos_v_avgd_over_snap[12-i,:]+pos_v_std_over_snap[12-i,:], alpha = 0.2)
+    plt.legend()
+    plt.xlabel(r"Wavelength (m$\AA$)")
+    plt.ylabel("Signed Mean Stokes V/Ic")
+    plt.xlim(xmin, xmax)
+    plt.ylim(ymin, ymax)
+    plt.title(f"{MultipleWrapperAnalyzer.analyzers[0].field_strength} G - Num snapshots: {len(snapshots)}")
+    plt.show()
+"""
