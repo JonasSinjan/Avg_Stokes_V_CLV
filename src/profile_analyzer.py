@@ -3,10 +3,11 @@ from astropy.io import fits
 
 class ProfileAnalyzer():
     
-    def __init__(self, field_strength, snapshot, negang_str) -> None:
+    def __init__(self, field_strength, snapshot, negang_str = '-', sqrt4pi = '') -> None:
         self.field_strength = field_strength
         self.snapshot = snapshot
         self.negang_str = negang_str
+        self.sqrt4pi = sqrt4pi
         self.mu_values = [0.0486,0.1007,0.1493,0.2014,0.25,0.2986,0.3993,0.5,0.6007,0.7014,0.7986,0.8993,1.0]
 
 
@@ -16,7 +17,7 @@ class ProfileAnalyzer():
         self.neg_profiles = []
 
         for i in range(13):
-            profile_path = f'/export/local/scratch/sinjan/spinor_fwd/ngrey_sqrt4pi_{self.field_strength}G/{self.snapshot}/6173_masi_theta{ang[i]}/inverted_profs.1.fits'
+            profile_path = f'/export/local/scratch/sinjan/spinor_fwd/ngrey_{self.sqrt4pi}{self.field_strength}G/{self.snapshot}/6173_masi_theta{ang[i]}/inverted_profs.1.fits'
             self.pos_profiles.append(fits.getdata(profile_path))
             if ang[i] == '00':
                 neg_str = ''
@@ -40,13 +41,18 @@ class ProfileAnalyzer():
         self.neg_signed_mean_v =  [x.mean(axis = (0,1)) for x in self.neg_v]
 
 
-    def get_mean_abs_stokes_V(self):
+    def get_abs_mean_stokes_V(self):
         self.pos_unsigned_mean_v =  [np.abs(x).mean(axis = (0,1)) for x in self.pos_v]
         self.neg_unsigned_mean_v =  [np.abs(x).mean(axis = (0,1)) for x in self.neg_v]
 
 
+    def get_mean_abs_stokes_V(self):
+        self.pos_mean_unsigned_mean_v =  [np.abs(x.mean(axis = (0,1))) for x in self.pos_v]
+        self.neg_mean_unsigned_mean_v =  [np.abs(x.mean(axis = (0,1))) for x in self.neg_v]
+
+
     def get_avg_amp(self, avg_v):
-        return [np.mean([abs(np.max(x/self.Ic)), abs(np.min(x/self.Ic))]) for x in avg_v]
+        return [np.mean([abs(np.max(x[100:151]/self.Ic)), abs(np.min(x[100:151]/self.Ic))]) for x in avg_v]
 
 
     def get_area(self, avg_v):
@@ -60,6 +66,7 @@ class ProfileAnalyzer():
         self.get_stokes_V()
         self.get_mean_stokes_V()
         self.get_mean_abs_stokes_V()
+        self.get_abs_mean_stokes_V()
 
 
     def get_pos_stokes_v_proxy_strengths(self):
