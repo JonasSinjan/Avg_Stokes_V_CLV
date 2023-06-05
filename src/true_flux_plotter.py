@@ -3,6 +3,7 @@ import matplotlib as mpl
 import numpy as np
 #from .multiple_snapshot_wrapper import MultipleSnapshotWrapper #for pytest
 import multiple_snapshot_wrapper as msw #for jupyter
+from operator import add
 
 class TrueFluxPlotter:
 
@@ -28,7 +29,7 @@ class TrueFluxPlotter:
 
     def get_temp_comb_curves(self) -> None:
         self.temp_samp = self.results.analyzers[self.snap_index].comb_normed_signed_amp
-        self.temp_usamp = self.results.analyzers[self.snap_index].comb_normed_unsigned_amp
+        self.temp_usamp = self.results.analyzers[self.snap_index].comb_normed_abs_mean_amp
         self.temp_sarea = self.results.analyzers[self.snap_index].comb_normed_signed_area
         self.temp_usarea = self.results.analyzers[self.snap_index].comb_normed_unsigned_area
 
@@ -41,16 +42,18 @@ class TrueFluxPlotter:
             print("Snapshot does not exist in", self.results.snapshots)
 
 
-    def plot_comb_single_snapshot(self, snapshot: int, show_unsigned: bool = True) -> None:
+    def plot_comb_single_snapshot(self, snapshot: int, show_area_amp: bool = True, show_asym: bool = False, show_abs_mean_amp: bool = False) -> None:
         self.get_snapshot_comb_results(snapshot)
         self.get_x_plot()
 
         _, ax = plt.subplots(figsize = (8,6))
-        if show_unsigned:
-            ax.plot(self.x_plot, self.temp_usarea, marker = "o", markersize = 3, color = 'blue', label = "Unsigned Area")
-            ax.plot(self.x_plot, self.temp_usamp, marker = "o", markersize = 3, color = 'orange', label = "Unsigned Amp")
-        ax.plot(self.x_plot, self.temp_sarea, marker = "o", markersize = 3, color = 'green', label = "Signed Area")
-        ax.plot(self.x_plot, self.temp_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")        
+        if show_abs_mean_amp:
+            ax.plot(self.x_plot, self.temp_usamp, marker = "o", markersize = 3, color = 'orange', label = "1.Abs 2.Mean Amp")
+        if show_asym:
+            ax.plot(self.x_plot, self.temp_sarea, marker = "o", markersize = 3, color = 'blue', label = "Asymmetry Area")
+        if show_area_amp:
+            ax.plot(self.x_plot, self.temp_usarea, marker = "o", markersize = 3, color = 'green', label = "Total Area")
+            ax.plot(self.x_plot, self.temp_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")        
 
         ax.plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
         ax.tick_params(bottom=True,top=True,left=True,right=True)
@@ -64,12 +67,12 @@ class TrueFluxPlotter:
     
     def get_temp_sep_curves(self) -> None:
         self.temp_pos_samp = self.results.analyzers[self.snap_index].pos_normed_signed_amp
-        self.temp_pos_usamp = self.results.analyzers[self.snap_index].pos_normed_unsigned_amp
+        self.temp_pos_usamp = self.results.analyzers[self.snap_index].pos_normed_abs_mean_amp
         self.temp_pos_sarea = self.results.analyzers[self.snap_index].pos_normed_signed_area
         self.temp_pos_usarea = self.results.analyzers[self.snap_index].pos_normed_unsigned_area
 
         self.temp_neg_samp = self.results.analyzers[self.snap_index].neg_normed_signed_amp
-        self.temp_neg_usamp = self.results.analyzers[self.snap_index].neg_normed_unsigned_amp
+        self.temp_neg_usamp = self.results.analyzers[self.snap_index].neg_normed_abs_mean_amp
         self.temp_neg_sarea = self.results.analyzers[self.snap_index].neg_normed_signed_area
         self.temp_neg_usarea = self.results.analyzers[self.snap_index].neg_normed_unsigned_area
 
@@ -82,18 +85,19 @@ class TrueFluxPlotter:
             print("Snapshot does not exist in", self.results.snapshots)
 
 
-    def plot_pos_neg_single_snapshot(self, snapshot: int, show_unsigned: bool = True) -> np.array:
+    def plot_pos_neg_single_snapshot(self, snapshot: int, show_area_amp: bool = True, show_asym: bool = False, show_abs_mean_amp: bool = False) -> np.array:
         self.get_snapshot_sep_results(snapshot)
         self.get_x_plot()
 
         _, axarr = plt.subplots(1,2,figsize = (16,6))
 
-        if show_unsigned:
-            axarr[0].plot(self.x_plot, self.temp_pos_usarea, marker = "o", markersize = 3, color = 'blue', label = "Unsigned Area")
-            axarr[0].plot(self.x_plot, self.temp_pos_usamp, marker = "o", markersize = 3, color = 'orange', label = "Unsigned Amp")
-
-        axarr[0].plot(self.x_plot, self.temp_pos_sarea, marker = "o", markersize = 3, color = 'green', label = "Signed Area")
-        axarr[0].plot(self.x_plot, self.temp_pos_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")        
+        if show_abs_mean_amp:
+            axarr[0].plot(self.x_plot, self.temp_pos_usamp, marker = "o", markersize = 3, color = 'orange', label = "1.Abs 2.Mean Amp")
+        if show_asym:
+            axarr[0].plot(self.x_plot, self.temp_pos_sarea, marker = "o", markersize = 3, color = 'blue', label = "Asymmetry Area")
+        if show_area_amp:
+            axarr[0].plot(self.x_plot, self.temp_pos_usarea, marker = "o", markersize = 3, color = 'green', label = "Total Area")
+            axarr[0].plot(self.x_plot, self.temp_pos_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")        
 
         axarr[0].plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
         axarr[0].tick_params(bottom=True,top=True,left=True,right=True)
@@ -104,12 +108,13 @@ class TrueFluxPlotter:
         axarr[0].set_ylabel("(Area or Amp) (normalised) / $\mu$")
         axarr[0].set_title(f"Snapshot: {snapshot} Stokes V Signal (pos) (normalised) {self.results.field_strength}G / $\mu$")
 
-        if show_unsigned:
-            axarr[1].plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, color = 'blue', label = "Unsigned Area")
-            axarr[1].plot(self.x_plot, self.temp_neg_usamp, marker = "o", markersize = 3, color = 'orange', label = "Unsigned Amp")
-
-        axarr[1].plot(self.x_plot, self.temp_neg_sarea, marker = "o", markersize = 3, color = 'green', label = "Signed Area")
-        axarr[1].plot(self.x_plot, self.temp_neg_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")        
+        if show_abs_mean_amp:
+            axarr[1].plot(self.x_plot, self.temp_neg_usamp, marker = "o", markersize = 3, color = 'orange', label = "1.Abs 2.Mean Amp")
+        if show_asym:
+            axarr[1].plot(self.x_plot, self.temp_neg_sarea, marker = "o", markersize = 3, color = 'blue', label = "Asymmetry Area")
+        if show_area_amp:
+            axarr[1].plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, color = 'green', label = "Total Area")
+            axarr[1].plot(self.x_plot, self.temp_neg_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")        
 
         axarr[1].plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
         axarr[1].tick_params(bottom=True,top=True,left=True,right=True)
@@ -131,14 +136,14 @@ class TrueFluxPlotter:
 
     def avg_curves(self) -> None:
         self.temp_usarea = np.mean([self.results.analyzers[i].comb_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.temp_usamp = np.mean([self.results.analyzers[i].comb_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.temp_usamp = np.mean([self.results.analyzers[i].comb_normed_abs_mean_amp for i in self.snap_indices], axis = 0)
         self.temp_sarea = np.mean([self.results.analyzers[i].comb_normed_signed_area for i in self.snap_indices], axis = 0)
         self.temp_samp = np.mean([self.results.analyzers[i].comb_normed_signed_amp for i in self.snap_indices], axis = 0)
 
 
     def std_curves(self) -> None:
         self.std_usarea = np.std([self.results.analyzers[i].comb_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.std_usamp = np.std([self.results.analyzers[i].comb_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.std_usamp = np.std([self.results.analyzers[i].comb_normed_abs_mean_amp for i in self.snap_indices], axis = 0)
         self.std_sarea = np.std([self.results.analyzers[i].comb_normed_signed_area for i in self.snap_indices], axis = 0)
         self.std_samp = np.std([self.results.analyzers[i].comb_normed_signed_amp for i in self.snap_indices], axis = 0)
         
@@ -156,7 +161,7 @@ class TrueFluxPlotter:
             print("Snapshots do not exist in", self.results.snapshots)
 
 
-    def plot_comb_multiple_snapshots(self, snapshots: list = None, show_unsigned: bool = True) -> mpl.axes:
+    def plot_comb_multiple_snapshots(self, snapshots: list = None, show_area_amp: bool = True, show_asym: bool = False, show_abs_mean_amp: bool = False) -> mpl.axes:
         if snapshots == None:
             snapshots = self.results.snapshots
         self.get_avg_std_of_curves(snapshots)
@@ -164,16 +169,18 @@ class TrueFluxPlotter:
 
         _, ax = plt.subplots(figsize = (8,6))
 
-        if show_unsigned:
-            ax.plot(self.x_plot, self.temp_usarea, marker = "o", markersize = 3, color = 'blue', label = "Unsigned Area")
-            ax.plot(self.x_plot, self.temp_usamp, marker = "o", markersize = 3, color = 'orange',  label = "Unsigned Amp")
-            ax.fill_between(self.x_plot, self.temp_usarea-self.std_usarea, self.temp_usarea+self.std_usarea, color = 'blue', alpha = 0.2)
+        if show_abs_mean_amp:
+            ax.plot(self.x_plot, self.temp_usamp, marker = "o", markersize = 3, color = 'orange',  label = "1.Abs 2.Mean Amp")
             ax.fill_between(self.x_plot, self.temp_usamp-self.std_usamp, self.temp_usamp+self.std_usamp, color = 'orange', alpha = 0.2)
-
-        ax.plot(self.x_plot, self.temp_sarea, marker = "o", markersize = 3, color = 'green',  label = "Signed Area")
-        ax.plot(self.x_plot, self.temp_samp, marker = "o", markersize = 3, color = 'red',  label = "Signed Amp")     
-        ax.fill_between(self.x_plot, self.temp_sarea-self.std_sarea, self.temp_sarea+self.std_sarea, color = 'green', alpha = 0.2)
-        ax.fill_between(self.x_plot, self.temp_samp-self.std_samp, self.temp_samp+self.std_samp, color = 'red', alpha = 0.2)   
+        if show_asym:
+            ax.plot(self.x_plot, self.temp_sarea, marker = "o", markersize = 3, color = 'blue',  label = "Asymmetry Area")
+            ax.fill_between(self.x_plot, self.temp_sarea-self.std_sarea, self.temp_sarea+self.std_sarea, color = 'blue', alpha = 0.2)
+        if show_area_amp:
+            ax.plot(self.x_plot, self.temp_usarea, marker = "o", markersize = 3, color = 'green', label = "Total Area")
+            ax.plot(self.x_plot, self.temp_samp, marker = "o", markersize = 3, color = 'red',  label = "Signed Amp")     
+            
+            ax.fill_between(self.x_plot, self.temp_usarea-self.std_usarea, self.temp_usarea+self.std_usarea, color = 'green', alpha = 0.2)
+            ax.fill_between(self.x_plot, self.temp_samp-self.std_samp, self.temp_samp+self.std_samp, color = 'red', alpha = 0.2)   
 
         ax.plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
         ax.tick_params(bottom=True,top=True,left=True,right=True)
@@ -188,24 +195,24 @@ class TrueFluxPlotter:
 
     def avg_sep_curves(self) -> None:
         self.temp_pos_usarea = np.mean([self.results.analyzers[i].pos_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.temp_pos_usamp = np.mean([self.results.analyzers[i].pos_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.temp_pos_usamp = np.mean([self.results.analyzers[i].pos_normed_abs_mean_amp for i in self.snap_indices], axis = 0)
         self.temp_pos_sarea = np.mean([self.results.analyzers[i].pos_normed_signed_area for i in self.snap_indices], axis = 0)
         self.temp_pos_samp = np.mean([self.results.analyzers[i].pos_normed_signed_amp for i in self.snap_indices], axis = 0)
 
         self.temp_neg_usarea = np.mean([self.results.analyzers[i].neg_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.temp_neg_usamp = np.mean([self.results.analyzers[i].neg_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.temp_neg_usamp = np.mean([self.results.analyzers[i].neg_normed_abs_mean_amp for i in self.snap_indices], axis = 0)
         self.temp_neg_sarea = np.mean([self.results.analyzers[i].neg_normed_signed_area for i in self.snap_indices], axis = 0)
         self.temp_neg_samp = np.mean([self.results.analyzers[i].neg_normed_signed_amp for i in self.snap_indices], axis = 0)
 
 
     def std_sep_curves(self) -> None:
         self.std_pos_usarea = np.std([self.results.analyzers[i].pos_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.std_pos_usamp = np.std([self.results.analyzers[i].pos_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.std_pos_usamp = np.std([self.results.analyzers[i].pos_normed_abs_mean_amp for i in self.snap_indices], axis = 0)
         self.std_pos_sarea = np.std([self.results.analyzers[i].pos_normed_signed_area for i in self.snap_indices], axis = 0)
         self.std_pos_samp = np.std([self.results.analyzers[i].pos_normed_signed_amp for i in self.snap_indices], axis = 0)
 
         self.std_neg_usarea = np.std([self.results.analyzers[i].neg_normed_unsigned_area for i in self.snap_indices], axis = 0)
-        self.std_neg_usamp = np.std([self.results.analyzers[i].neg_normed_unsigned_amp for i in self.snap_indices], axis = 0)
+        self.std_neg_usamp = np.std([self.results.analyzers[i].neg_normed_abs_mean_amp for i in self.snap_indices], axis = 0)
         self.std_neg_sarea = np.std([self.results.analyzers[i].neg_normed_signed_area for i in self.snap_indices], axis = 0)
         self.std_neg_samp = np.std([self.results.analyzers[i].neg_normed_signed_amp for i in self.snap_indices], axis = 0)
 
@@ -219,7 +226,7 @@ class TrueFluxPlotter:
             print("Snapshots do not exist in", self.results.snapshots)
 
     
-    def plot_pos_neg_multiple_snapshots(self, snapshots: list = None, show_unsigned: bool = True) -> np.array:
+    def plot_pos_neg_multiple_snapshots(self, snapshots: list = None, show_area_amp: bool = True, show_asym: bool = False, show_abs_mean_amp: bool = False) -> np.array:
         if snapshots == None:
             snapshots = self.results.snapshots
         self.get_avg_std_of_sep_curves(snapshots)
@@ -227,16 +234,18 @@ class TrueFluxPlotter:
 
         _, axarr = plt.subplots(1,2,figsize = (16,6))
 
-        if show_unsigned:
-            axarr[0].plot(self.x_plot, self.temp_pos_usarea, marker = "o", markersize = 3, color = 'blue', label = "Unsigned Area")
-            axarr[0].plot(self.x_plot, self.temp_pos_usamp, marker = "o", markersize = 3, color = 'orange', label = "Unsigned Amp")
-            axarr[0].fill_between(self.x_plot, self.temp_pos_usarea-self.std_pos_usarea, self.temp_pos_usarea+self.std_pos_usarea, color = 'blue', alpha = 0.2)
+        if show_abs_mean_amp:
+            axarr[0].plot(self.x_plot, self.temp_pos_usamp, marker = "o", markersize = 3, color = 'orange',  label = "1.Abs 2.Mean Amp")
             axarr[0].fill_between(self.x_plot, self.temp_pos_usamp-self.std_pos_usamp, self.temp_pos_usamp+self.std_pos_usamp, color = 'orange', alpha = 0.2)
-
-        axarr[0].plot(self.x_plot, self.temp_pos_sarea, marker = "o", markersize = 3, color = 'green', label = "Signed Area")
-        axarr[0].plot(self.x_plot, self.temp_pos_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")  
-        axarr[0].fill_between(self.x_plot, self.temp_pos_sarea-self.std_pos_sarea, self.temp_pos_sarea+self.std_pos_sarea, color = 'green', alpha = 0.2)
-        axarr[0].fill_between(self.x_plot, self.temp_pos_samp-self.std_pos_samp, self.temp_pos_samp+self.std_pos_samp, color = 'red', alpha = 0.2)   
+        if show_asym:
+            axarr[0].plot(self.x_plot, self.temp_pos_sarea, marker = "o", markersize = 3, color = 'blue',  label = "Asymmetry Area")
+            axarr[0].fill_between(self.x_plot, self.temp_pos_sarea-self.std_pos_sarea, self.temp_pos_sarea+self.std_pos_sarea, color = 'blue', alpha = 0.2)
+        if show_area_amp:
+            axarr[0].plot(self.x_plot, self.temp_pos_usarea, marker = "o", markersize = 3, color = 'green', label = "Total Area")
+            axarr[0].plot(self.x_plot, self.temp_pos_samp, marker = "o", markersize = 3, color = 'red',  label = "Signed Amp")     
+            
+            axarr[0].fill_between(self.x_plot, self.temp_pos_usarea-self.std_pos_usarea, self.temp_pos_usarea+self.std_pos_usarea, color = 'green', alpha = 0.2)
+            axarr[0].fill_between(self.x_plot, self.temp_pos_samp-self.std_pos_samp, self.temp_pos_samp+self.std_pos_samp, color = 'red', alpha = 0.2)  
 
         axarr[0].plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
         axarr[0].tick_params(bottom=True,top=True,left=True,right=True)
@@ -247,16 +256,18 @@ class TrueFluxPlotter:
         axarr[0].set_ylabel("(Area or Amp) (normalised) / $\mu$")
         axarr[0].set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (pos) (normalised) {self.results.field_strength}G / $\mu$")
 
-        if show_unsigned:
-            axarr[1].plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, color = 'blue', label = "Unsigned Area")
-            axarr[1].plot(self.x_plot, self.temp_neg_usamp, marker = "o", markersize = 3, color = 'orange', label = "Unsigned Amp")
-            axarr[1].fill_between(self.x_plot, self.temp_neg_usarea-self.std_neg_usarea, self.temp_neg_usarea+self.std_neg_usarea, color = 'blue', alpha = 0.2)
+        if show_abs_mean_amp:
+            axarr[1].plot(self.x_plot, self.temp_neg_usamp, marker = "o", markersize = 3, color = 'orange',  label = "1.Abs 2.Mean Amp")
             axarr[1].fill_between(self.x_plot, self.temp_neg_usamp-self.std_neg_usamp, self.temp_neg_usamp+self.std_neg_usamp, color = 'orange', alpha = 0.2)
-
-        axarr[1].plot(self.x_plot, self.temp_neg_sarea, marker = "o", markersize = 3, color = 'green',label = "Signed Area")
-        axarr[1].plot(self.x_plot, self.temp_neg_samp, marker = "o", markersize = 3, color = 'red', label = "Signed Amp")     
-        axarr[1].fill_between(self.x_plot, self.temp_neg_sarea-self.std_neg_sarea, self.temp_neg_sarea+self.std_neg_sarea, color = 'green', alpha = 0.2)
-        axarr[1].fill_between(self.x_plot, self.temp_neg_samp-self.std_neg_samp, self.temp_neg_samp+self.std_neg_samp, color = 'red', alpha = 0.2)              
+        if show_asym:
+            axarr[1].plot(self.x_plot, self.temp_neg_sarea, marker = "o", markersize = 3, color = 'blue',  label = "Asymmetry Area")
+            axarr[1].fill_between(self.x_plot, self.temp_neg_sarea-self.std_neg_sarea, self.temp_neg_sarea+self.std_neg_sarea, color = 'blue', alpha = 0.2)
+        if show_area_amp:
+            axarr[1].plot(self.x_plot, self.temp_neg_usarea, marker = "o", markersize = 3, color = 'green', label = "Total Area")
+            axarr[1].plot(self.x_plot, self.temp_neg_samp, marker = "o", markersize = 3, color = 'red',  label = "Signed Amp")     
+            
+            axarr[1].fill_between(self.x_plot, self.temp_neg_usarea-self.std_neg_usarea, self.temp_neg_usarea+self.std_neg_usarea, color = 'green', alpha = 0.2)
+            axarr[1].fill_between(self.x_plot, self.temp_neg_samp-self.std_neg_samp, self.temp_neg_samp+self.std_neg_samp, color = 'red', alpha = 0.2)     
 
         axarr[1].plot(np.linspace(0,1,10), np.linspace(1,1,10), color = 'black', linestyle = '--')
         axarr[1].tick_params(bottom=True,top=True,left=True,right=True)
@@ -352,7 +363,7 @@ class TrueFluxPlotter:
             elif pos_or_neg == 'neg':
                 stokes_v_stacked_over_mu.append(np.stack(self.results.analyzers[snap_index].neg_signed_mean_v/self.results.analyzers[snap_index].Ic))
             elif pos_or_neg == 'both':
-                stokes_v_stacked_over_mu.append(np.stack((self.results.analyzers[snap_index].pos_signed_mean_v + self.results.analyzers[snap_index].neg_signed_mean_v)/(2*self.results.analyzers[snap_index].Ic)))
+                stokes_v_stacked_over_mu.append(np.stack(list(map(add,self.results.analyzers[snap_index].pos_signed_mean_v,self.results.analyzers[snap_index].neg_signed_mean_v))/(2*self.results.analyzers[snap_index].Ic)))
             
         v_over_mu_and_snap = np.stack(stokes_v_stacked_over_mu)
         v_avgd_over_snap = np.mean(v_over_mu_and_snap, axis = 0)
