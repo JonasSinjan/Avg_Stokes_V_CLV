@@ -5,19 +5,19 @@ import profile_analyzer as pa
 
 class MultipleSnapshotWrapper:
 
-    def __init__(self, field_strength, snapshots: list = None, negang_str: str = '-', sqrt4pi: str = '') -> None:
+    def __init__(self, dir, field_strength, snapshots: list = None, negang_str: str = '-') -> None:
         assert type(snapshots) == list
         assert len(snapshots) > 0
+        self.dir = dir
         self.snapshots = snapshots
         self.field_strength = field_strength
         self.negang_str = negang_str
         self.analyzers = []
-        self.sqrt4pi = sqrt4pi
 
 
     def run_multiple_analyzers(self):
         for snap in self.snapshots:
-            temp = pa.ProfileAnalyzer(self.field_strength, snap, self.negang_str, self.sqrt4pi)
+            temp = pa.ProfileAnalyzer(self.dir, self.field_strength, snap, self.negang_str)
             temp.run_analysis()
             self.analyzers.append(temp)
 

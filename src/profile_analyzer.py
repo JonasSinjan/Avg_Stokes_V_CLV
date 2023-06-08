@@ -3,11 +3,11 @@ from astropy.io import fits
 
 class ProfileAnalyzer():
     
-    def __init__(self, field_strength, snapshot, negang_str = '-', sqrt4pi = '') -> None:
+    def __init__(self, dir, field_strength, snapshot, negang_str = '-') -> None:
+        self.dir = dir
         self.field_strength = field_strength
         self.snapshot = snapshot
         self.negang_str = negang_str
-        self.sqrt4pi = sqrt4pi
         self.mu_values = [0.0486,0.1007,0.1493,0.2014,0.25,0.2986,0.3993,0.5,0.6007,0.7014,0.7986,0.8993,1.0]
 
 
@@ -17,7 +17,7 @@ class ProfileAnalyzer():
         self.neg_profiles = []
 
         for i in range(13):
-            profile_path = f'/export/local/scratch/sinjan/spinor_fwd/ngrey_{self.sqrt4pi}{self.field_strength}G/{self.snapshot}/6173_masi_theta{ang[i]}/inverted_profs.1.fits'
+            profile_path = f'/export/local/scratch/sinjan/spinor_fwd/{self.dir}/{self.snapshot}/6173_masi_theta{ang[i]}/inverted_profs.1.fits'
             self.pos_profiles.append(fits.getdata(profile_path))
             if ang[i] == '00':
                 neg_str = ''
