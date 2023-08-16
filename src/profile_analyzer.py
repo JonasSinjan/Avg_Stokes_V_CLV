@@ -55,9 +55,6 @@ class ProfileAnalyzer():
     def del_full_profiles(self):
         del self.pos_profiles
         del self.neg_profiles
-
-    
-    def del_stokes_V_profiles(self):
         del self.pos_v
         del self.neg_v
 
