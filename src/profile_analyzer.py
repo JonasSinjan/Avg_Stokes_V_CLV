@@ -1,5 +1,6 @@
 import numpy as np
 from astropy.io import fits
+import scipy.integrate as spi
 
 class ProfileAnalyzer():
     
@@ -39,7 +40,7 @@ class ProfileAnalyzer():
     def get_mean_stokes_V(self):
         self.pos_signed_mean_v =  [x.mean(axis = (0,1)) for x in self.pos_v]
         self.neg_signed_mean_v =  [x.mean(axis = (0,1)) for x in self.neg_v]
-
+        
 
     def get_abs_mean_stokes_V(self):
         self.pos_unsigned_mean_v =  [np.abs(x).mean(axis = (0,1)) for x in self.pos_v]
@@ -50,6 +51,16 @@ class ProfileAnalyzer():
         self.pos_mean_unsigned_mean_v =  [np.abs(x.mean(axis = (0,1))) for x in self.pos_v]
         self.neg_mean_unsigned_mean_v =  [np.abs(x.mean(axis = (0,1))) for x in self.neg_v]
 
+                
+    def del_full_profiles(self):
+        del self.pos_profiles
+        del self.neg_profiles
+
+    
+    def del_stokes_V_profiles(self):
+        del self.pos_v
+        del self.neg_v
+
 
     def get_avg_amp(self, avg_v):
         return [np.mean([abs(np.max(x[100:151]/self.Ic)), abs(np.min(x[100:151]/self.Ic))]) for x in avg_v]
@@ -57,12 +68,16 @@ class ProfileAnalyzer():
 
     def get_abs_area(self, avg_v):
         WAVELENGTH_STEP_SIZE = 0.014 #Angstrom
-        return [np.trapz(abs(x[100:151]/self.Ic), dx = WAVELENGTH_STEP_SIZE) for x in avg_v]
+        return [spi.simpson(abs(x[100:151]/self.Ic), dx = WAVELENGTH_STEP_SIZE) for x in avg_v]#np.trapz
+    
+    def get_fringe_abs_area(self, avg_v):
+        WAVELENGTH_STEP_SIZE = 0.014 #Angstrom
+        return [spi.simpson(abs(x[100:111]/self.Ic), dx = WAVELENGTH_STEP_SIZE) + spi.simpson(abs(x[135:151]/self.Ic), dx = WAVELENGTH_STEP_SIZE) for x in avg_v]#np.trapz
     
 
     def get_area(self, avg_v):
         WAVELENGTH_STEP_SIZE = 0.014 #Angstrom
-        return [np.trapz(x[100:151]/self.Ic, dx = WAVELENGTH_STEP_SIZE) for x in avg_v]
+        return [spi.simpson(x[100:151]/self.Ic, dx = WAVELENGTH_STEP_SIZE) for x in avg_v]
 
 
     def get_mean_signed_and_unsigned_stokes_vs(self):
@@ -72,7 +87,20 @@ class ProfileAnalyzer():
         self.get_mean_stokes_V()
         #self.get_mean_abs_stokes_V()
         self.get_abs_mean_stokes_V()
+        self.del_profiles()
+        
+        
+    def get_5250_fringe_line_frac(self):
+        self.get_mean_signed_and_unsigned_stokes_vs()
+        self.pos_unsigned_area = self.get_abs_area(self.pos_signed_mean_v)
+        self.neg_unsigned_area = self.get_abs_area(self.neg_signed_mean_v)
+        
+        self.pos_funsigned_area = self.get_fringe_abs_area(self.pos_signed_mean_v)
+        self.neg_funsigned_area = self.get_fringe_abs_area(self.neg_signed_mean_v)
 
+        self.pos_frac = [np.round(i/j,3) for i,j in zip(self.pos_funsigned_area, self.pos_unsigned_area)]
+        self.neg_frac = [np.round(i/j,3) for i,j in zip(self.neg_funsigned_area, self.neg_unsigned_area)]
+        
 
     def get_pos_stokes_v_proxy_strengths(self):
         self.pos_signed_amp = self.get_avg_amp(self.pos_signed_mean_v)

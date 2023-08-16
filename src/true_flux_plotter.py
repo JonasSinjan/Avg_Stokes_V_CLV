@@ -279,6 +279,42 @@ class TrueFluxPlotter:
         axarr[1].set_title(f"Num Snapshot(s): {len(snapshots)} Stokes V Signal (neg) (normalised) {self.results.field_strength}G / $\mu$")
         return axarr
     
+    
+    def get_stokes_v_profs(self, snapshots: list, mu_indices: list = range(13), pos_or_neg: str = 'pos') -> None:
+        """
+        calculate the stokes v profiles for a given list of snapshots and mu values, and for a given viewing direction (pos or neg or both)
+
+        Parameters
+        ----------
+        snapshots : list
+            list of snapshot numbers
+        mu_indices : list
+            list of indices of the mu value(s) to plot - to see possible mu values: execute `self.get_x_plot()`, then `print(self.mu_values)`
+        pos_or_neg : str
+            'pos' for positive viewing direction, 'neg' for negative viewing direction, 'both' for both
+        
+        Returns
+        -------
+        None
+        """
+        stokes_v_stacked_over_mu = []
+        for snapshot in snapshots:
+            snap_index = self.results.snapshots.index(snapshot)
+            if pos_or_neg == 'pos':
+                stokes_v_stacked_over_mu.append(np.stack(self.results.analyzers[snap_index].pos_signed_mean_v/self.results.analyzers[snap_index].Ic))
+            elif pos_or_neg == 'neg':
+                stokes_v_stacked_over_mu.append(np.stack(self.results.analyzers[snap_index].neg_signed_mean_v/self.results.analyzers[snap_index].Ic))
+            elif pos_or_neg == 'both':
+                stokes_v_stacked_over_mu.append(np.stack(list(map(add,self.results.analyzers[snap_index].pos_signed_mean_v,self.results.analyzers[snap_index].neg_signed_mean_v))/(2*self.results.analyzers[snap_index].Ic)))
+            
+        v_over_mu_and_snap = np.stack(stokes_v_stacked_over_mu)
+        v_avgd_over_snap = np.mean(v_over_mu_and_snap, axis = 0)
+        v_std_over_snap = np.std(v_over_mu_and_snap, axis = 0)
+
+        selected_mu_v_profs = v_avgd_over_snap[mu_indices]
+        selected_mu_v_profs_std = v_std_over_snap[mu_indices]
+        return selected_mu_v_profs, selected_mu_v_profs_std
+
 
     def plot_stokes_v(self, snapshot: int, mu_indices: list, pos_or_neg: str = 'pos', xmax: int = 1750, xmin: int = -1750, ymin: float = -0.01, ymax: float = 0.01) -> None:
         """

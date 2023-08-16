@@ -29,3 +29,11 @@ class MultipleSnapshotWrapper:
     def num_snapshots(self):
         print(len(self.snapshots))
         return len(self.snapshots)
+    
+    
+    def run_5250_fringe_analysis(self):
+        for snap in self.snapshots:
+            temp = pa.ProfileAnalyzer(self.dir, self.field_strength, snap, self.negang_str)
+            temp.get_5250_fringe_line_frac()
+            self.analyzers.append(temp)
+            
