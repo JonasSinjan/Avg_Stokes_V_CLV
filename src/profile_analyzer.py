@@ -52,20 +52,37 @@ class ProfileAnalyzer():
         self.neg_mean_unsigned_mean_v =  [np.abs(x.mean(axis = (0,1))) for x in self.neg_v]
 
                 
-    def del_full_profiles(self):
+    def del_profiles(self):
         del self.pos_profiles
         del self.neg_profiles
         del self.pos_v
         del self.neg_v
 
 
+    def check_if_5250(self):
+        if '5250' in self.dir:
+            return True
+
+
     def get_avg_amp(self, avg_v):
-        return [np.mean([abs(np.max(x[100:151]/self.Ic)), abs(np.min(x[100:151]/self.Ic))]) for x in avg_v]
+        if self.check_if_5250():
+            start = 100
+            end = 141
+        else:
+            start = 100
+            end = 151
+        return [np.mean([abs(np.max(x[start:end]/self.Ic)), abs(np.min(x[start:end]/self.Ic))]) for x in avg_v]
 
 
     def get_abs_area(self, avg_v):
+        if self.check_if_5250():
+            start = 100
+            end = 141
+        else:
+            start = 100
+            end = 151
         WAVELENGTH_STEP_SIZE = 0.014 #Angstrom
-        return [spi.simpson(abs(x[100:151]/self.Ic), dx = WAVELENGTH_STEP_SIZE) for x in avg_v]#np.trapz
+        return [spi.simpson(abs(x[start:end]/self.Ic), dx = WAVELENGTH_STEP_SIZE) for x in avg_v]#np.trapz
     
     def get_fringe_abs_area(self, avg_v):
         WAVELENGTH_STEP_SIZE = 0.014 #Angstrom
@@ -73,8 +90,14 @@ class ProfileAnalyzer():
     
 
     def get_area(self, avg_v):
+        if self.check_if_5250():
+            start = 100
+            end = 141
+        else:
+            start = 100
+            end = 151
         WAVELENGTH_STEP_SIZE = 0.014 #Angstrom
-        return [spi.simpson(x[100:151]/self.Ic, dx = WAVELENGTH_STEP_SIZE) for x in avg_v]
+        return [spi.simpson(x[start:end]/self.Ic, dx = WAVELENGTH_STEP_SIZE) for x in avg_v]
 
 
     def get_mean_signed_and_unsigned_stokes_vs(self):
