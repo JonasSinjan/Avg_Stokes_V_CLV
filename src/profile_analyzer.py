@@ -10,6 +10,7 @@ class ProfileAnalyzer():
         self.snapshot = snapshot
         self.negang_str = negang_str
         self.mu_values = [0.0486,0.1007,0.1493,0.2014,0.25,0.2986,0.3993,0.5,0.6007,0.7014,0.7986,0.8993,1.0]
+        self.angles = ['00','25_9','37','45_5','53','60','66_5','72_6','75_5','78_4','81_4','84_2','87_2']
 
 
     def get_profiles(self):
@@ -30,6 +31,11 @@ class ProfileAnalyzer():
 
     def get_Ic(self):
         self.Ic = self.pos_profiles[0][:,:,0,:50].mean()
+
+
+    def get_stokes_I(self):
+        self.pos_I = [x[:,:,0,:].mean(axis=(0,1)) for x in self.pos_profiles]
+        self.neg_I = [x[:,:,0,:].mean(axis=(0,1)) for x in self.neg_profiles]
 
 
     def get_stokes_V(self):
@@ -102,6 +108,7 @@ class ProfileAnalyzer():
 
     def get_mean_signed_and_unsigned_stokes_vs(self):
         self.get_profiles()
+        self.get_stokes_I()
         self.get_Ic()
         self.get_stokes_V()
         self.get_mean_stokes_V()
