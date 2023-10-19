@@ -163,6 +163,18 @@ class ProfileAnalyzer():
         self.neg_normed_unsigned_area = np.flip(self.neg_unsigned_area)/self.pos_unsigned_area[0]/self.mu_values
 
 
+    def norm_curves_by_mu(self):
+        self.pos_normed_signed_amp = np.flip(self.pos_signed_amp)/self.mu_values
+        self.pos_normed_abs_mean_amp = np.flip(self.pos_abs_mean_amp)/self.mu_values
+        self.pos_normed_signed_area = np.flip(self.pos_signed_area)/self.mu_values
+        self.pos_normed_unsigned_area = np.flip(self.pos_unsigned_area)/self.mu_values
+
+        self.neg_normed_signed_amp = np.flip(self.neg_signed_amp)/self.mu_values
+        self.neg_normed_abs_mean_amp = np.flip(self.neg_abs_mean_amp)/self.mu_values
+        self.neg_normed_signed_area = np.flip(self.neg_signed_area)/self.mu_values
+        self.neg_normed_unsigned_area = np.flip(self.neg_unsigned_area)/self.mu_values
+
+
     def return_pos_neg_normed_curves_as_lists(self):
         return [self.pos_normed_signed_amp, self.pos_normed_abs_mean_amp, self.pos_normed_signed_area, self.pos_normed_unsigned_area], [self.neg_normed_signed_amp, self.neg_normed_abs_mean_amp, self.neg_normed_signed_area, self.neg_normed_unsigned_area]
     
@@ -179,5 +191,5 @@ class ProfileAnalyzer():
         self.get_mean_signed_and_unsigned_stokes_vs()
         self.get_pos_stokes_v_proxy_strengths()
         self.get_neg_stokes_v_proxy_strengths()
-        self.norm_curves_by_mu_and_mu_is_1_value()
+        self.norm_curves_by_mu_and_mu_is_1_value() #point of optionality with norm_curves_by_mu() - ie do mu=1 normalization at a later point
         self.combine_pos_neg_normed_curves()
